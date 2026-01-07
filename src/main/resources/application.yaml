@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: ${APP_NAME:saga-conductor-demo}
+  config:
+    import: "optional:file:.env[.properties]"
+
+
+  datasource:
+    url: ${DATASOURCE_URL:jdbc:postgresql://postgres-db:5432/saga}
+    username: ${DATASOURCE_USERNAME:postgres}
+    password: ${DATASOURCE_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+#    changeLogFile: db/changelog/db.changelog-master.yaml
+
+  liquibase:
+    enabled: true
+    change-log: "classpath:db/changelog/db.changelog-master.yaml"
+    test-rollback-on-update: false
+    default-schema: public
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+conductor:
+  server:
+    url: ${CONDUCTOR_SERVER_URL:http://conductor-server:8080/api}
+
+logging:
+  file:
+    name: ./logs/application.log
+  level:
+    root: INFO
+    org.springframework: WARN
+    com.radmiy.sagaconductordemo: DEBUG
+    org.liquibase: DEBUG
+  pattern:
+    console: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){green} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+server:
+  port: ${SERVER_PORT:8080}

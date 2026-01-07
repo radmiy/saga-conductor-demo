@@ -1,0 +1,63 @@
+{
+  "name": "order_placement_saga",
+  "version": 1,
+  "tasks": [
+    {
+      "name": "reserve_order",
+      "taskReferenceName": "t_order",
+      "type": "SIMPLE",
+      "inputParameters": {
+        "userId": "${workflow.input.userId}"
+      }
+    },
+    {
+      "name": "debit_payment",
+      "taskReferenceName": "t_payment",
+      "type": "SIMPLE",
+      "inputParameters": {
+        "userId": "${workflow.input.userId}",
+        "amount": "${workflow.input.amount}",
+        "orderId": "${t_order.output.orderId}"
+      }
+    },
+    {
+      "name": "reserve_inventory",
+      "taskReferenceName": "t_inventory",
+      "type": "SIMPLE",
+      "inputParameters": {
+        "userId": "${workflow.input.userId}",
+        "orderId": "${t_order.output.orderId}",
+        "items": "${workflow.input.items}"
+      }
+    },
+    {
+      "name": "create_shipping",
+      "taskReferenceName": "t_shipping",
+      "type": "SIMPLE",
+      "inputParameters": {
+        "userId": "${workflow.input.userId}",
+        "orderId": "${t_order.output.orderId}",
+        "address": "${workflow.input.address}"
+      }
+    },
+    {
+      "name": "complete_saga_task",
+      "taskReferenceName": "complete_saga",
+      "type": "SIMPLE",
+      "inputParameters": {
+        "orderId": "${t_order.output.orderId}",
+        "paymentId": "${t_payment.output.paymentId}",
+        "inventoryId": "${t_inventory.output.inventoryId}",
+        "shipmentId": "${t_shipping.output.shipmentId}"
+      }
+    }
+  ],
+  "failureWorkflow": "order_saga_compensation",
+  "schemaVersion": 2,
+  "outputParameters": {
+    "orderId": "${t_order.output.orderId}",
+    "paymentId": "${t_payment.output.paymentId}",
+    "inventoryId": "${t_inventory.output.inventoryId}",
+    "shipmentId": "${t_shipping.output.shipmentId}"
+  }
+}

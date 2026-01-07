@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  conductor-server:
+    image: conductoross/conductor-standalone:3.15.0
+    container_name: conductor-server
+    environment:
+      - CONFIG_PROP=conductor-config.properties
+      - conductor.redis-lock.server-type=single
+      - conductor.redis-lock.server-address=redis://redis:6379
+    ports:
+      - "8080:8080"
+      - "5000:5000"
+    volumes:
+      - ./conductor-config.properties:/app/config.properties
+    healthcheck:
+      test: ["CMD", "curl", "-I", "-XGET", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      postgres:
+        condition: service_healthy
+      opensearch:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # База данных для хранения Workflow и задач
+  postgres:
+    image: postgres
+    container_name: postgres
+    environment:
+      - POSTGRES_DB=conductor
+      - POSTGRES_USER=conductor
+      - POSTGRES_PASSWORD=conductor
+    ports:
+      - "5442:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U conductor"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Поисковый движок для индексации
+  opensearch:
+    image: opensearchproject/opensearch:latest
+    container_name: opensearch
+    environment:
+      - "discovery.type=single-node"
+      - "plugins.security.disabled=true"
+      - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=ComplexPassword123!"
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    healthcheck:
+      test: ["CMD", "curl", "-s", "http://localhost:9200/_cluster/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis для очередей и блокировок
+  redis:
+    image: redis:6.2-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5

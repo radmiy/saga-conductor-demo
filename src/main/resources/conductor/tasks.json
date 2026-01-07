@@ -1,0 +1,75 @@
+[
+  {
+    "name": "reserve_order",
+    "retryCount": 2,
+    "retryLogic": "FIXED",
+    "retryDelaySeconds": 5,
+    "timeoutSeconds": 60,
+    "responseTimeoutSeconds": 30
+  },
+  {
+    "name": "cancel_order",
+    "retryCount": 3,
+    "retryLogic": "EXPONENTIAL_BACKOFF",
+    "retryDelaySeconds": 10,
+    "timeoutSeconds": 60,
+    "responseTimeoutSeconds": 30
+  },
+  {
+    "name": "debit_payment",
+    "retryCount": 2,
+    "retryLogic": "FIXED",
+    "retryDelaySeconds": 10,
+    "timeoutSeconds": 60,
+    "responseTimeoutSeconds": 30
+  },
+  {
+    "name": "refund_payment",
+    "retryCount": 3,
+    "retryLogic": "EXPONENTIAL_BACKOFF",
+    "retryDelaySeconds": 10,
+    "timeoutSeconds": 60,
+    "responseTimeoutSeconds": 30
+  },
+  {
+    "name": "reserve_inventory",
+    "retryCount": 2,
+    "retryLogic": "FIXED",
+    "retryDelaySeconds": 10,
+    "timeoutSeconds": 60,
+    "responseTimeoutSeconds": 30
+  },
+  {
+    "name": "release_inventory",
+    "retryCount": 3,
+    "retryLogic": "EXPONENTIAL_BACKOFF",
+    "retryDelaySeconds": 10,
+    "timeoutSeconds": 60,
+    "responseTimeoutSeconds": 30
+  },
+  {
+    "name": "create_shipping",
+    "retryCount": 2,
+    "retryLogic": "FIXED",
+    "retryDelaySeconds": 5,
+    "timeoutSeconds": 120,
+    "responseTimeoutSeconds": 60
+  },
+  {
+    "name": "cancel_shipping",
+    "retryCount": 3,
+    "retryLogic": "EXPONENTIAL_BACKOFF",
+    "retryDelaySeconds": 10,
+    "timeoutSeconds": 60,
+    "responseTimeoutSeconds": 30
+  },
+  {
+    "name": "complete_saga_task",
+    "retryCount": 3,
+    "retryLogic": "FIXED",
+    "retryDelaySeconds": 5,
+    "timeoutSeconds": 120,
+    "responseTimeoutSeconds": 60,
+    "optional": true
+  }
+]

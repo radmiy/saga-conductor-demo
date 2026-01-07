@@ -1,0 +1,40 @@
+{
+  "name": "order_saga_compensation",
+  "version": 1,
+  "tasks": [
+    {
+      "name": "cancel_shipping",
+      "taskReferenceName": "c_ship",
+      "type": "SIMPLE",
+      "inputParameters": {
+        "shipmentId": "${workflow.input.failedWorkflow.output.shipmentId}"
+      }
+    },
+    {
+      "name": "release_inventory",
+      "taskReferenceName": "c_inv",
+      "type": "SIMPLE",
+      "inputParameters": {
+        "inventoryId": "${workflow.input.failedWorkflow.output.inventoryId}"
+      }
+    },
+    {
+      "name": "refund_payment",
+      "taskReferenceName": "c_pay",
+      "type": "SIMPLE",
+      "inputParameters": {
+        "paymentId": "${workflow.input.failedWorkflow.output.paymentId}",
+        "amount": "${workflow.input.amount}"
+      }
+    },
+    {
+      "name": "cancel_order",
+      "taskReferenceName": "c_ord",
+      "type": "SIMPLE",
+      "inputParameters": {
+        "orderId": "${workflow.input.failedWorkflow.output.orderId}"
+      }
+    }
+  ],
+  "schemaVersion": 2
+}

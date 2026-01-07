@@ -1,0 +1,38 @@
+.editorconfig
+HELP.md
+
+# Build artifacts
+.gradle
+!gradle-wrapper.jar
+!gradlew
+!gradlew.bat
+build
+!build/libs
+**/*.jar.original
+out
+*.jar
+
+# IntelliJ
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+
+# OS
+.DS_Store
+Thumbs.db
+*/target/
+test-results/
+coverage/
+
+# Logs and reports
+*.log
+**/*.log
+test-output/
+reports/
+tmp/
+
+# Git
+.git
+.gitignore

@@ -1,0 +1,19 @@
+databaseChangeLog:
+  - changeSet:
+      id: tag-0.0
+      author: radmiy
+      context: init
+      comment: "Tag for empty database"
+      changes:
+        - tagDatabase:
+            tag: v0.0
+
+  - include:
+      file: v1_0/db.changelog-1.0-create-tables.yaml
+      relativeToChangelogFile: true
+  - changeSet:
+      id: tag-1.0
+      author: radmiy
+      changes:
+        - tagDatabase:
+            tag: v1.0
