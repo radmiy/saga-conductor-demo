@@ -21,6 +21,9 @@ public record OrderRequest(
         List<String> items,
 
         @NotBlank(message = "Delivery address is required")
-        String address
+        String address,
+
+        String error,
+        String step
 ) {
 }

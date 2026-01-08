@@ -23,7 +23,7 @@
 
 Сборка с помощью Docker Compose:
 ```bash
-docker-compose build
+docker compose build
 ```
 
 **Conductor UI: http://localhost:5000**
@@ -45,7 +45,8 @@ curl -X POST http://localhost:8090/api/orders/start-saga \
     -d '{
       "userId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "items": ["Laptop", "Mouse"],
-      "amount": 1500.00
+      "amount": 1500.00,
+      "address": "Minsk"
     }'
 ```
 2. Поиск и агрегация (UserInfo)

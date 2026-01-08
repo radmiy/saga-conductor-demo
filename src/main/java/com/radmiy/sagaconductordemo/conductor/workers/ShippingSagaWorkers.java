@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -25,6 +26,7 @@ public class ShippingSagaWorkers {
 
     /**
      * Shipping order creation task
+     *
      * @param input data that contains userId, orderId and address
      * @return output data that contains shipmentId
      */
@@ -35,11 +37,20 @@ public class ShippingSagaWorkers {
         var address = input.get("address").toString();
         var userId = UUID.fromString(input.get("userId").toString());
         var orderId = UUID.fromString(input.get("orderId").toString());
+        String step = Optional.ofNullable(input.get("step"))
+                .filter(Objects::nonNull)
+                .map(Object::toString)
+                .orElse(null);
 
         try {
             if (!service.isExist(userId, orderId)) {
                 // flow error simulation
+                String error = null;
+                if ("shipment".equalsIgnoreCase(step)) {
+                    error = input.get("error").toString();
+                }
                 result = getError(result,
+                        error,
                         "Error in shipping step",
                         "Shipping address not exist");
                 if (result.getStatus() == TaskResult.Status.FAILED_WITH_TERMINAL_ERROR) {
@@ -76,6 +87,7 @@ public class ShippingSagaWorkers {
 
     /**
      * Compensation task
+     *
      * @param input data that contains shipmentId
      */
     @WorkerTask("cancel_shipping")

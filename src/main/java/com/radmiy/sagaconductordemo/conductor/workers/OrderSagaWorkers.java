@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -34,12 +35,21 @@ public class OrderSagaWorkers {
         log.info("Requested creation order");
         var result = new TaskResult();
         var userId = UUID.fromString(input.get("userId").toString());
+        String step = Optional.ofNullable(input.get("step"))
+                .filter(Objects::nonNull)
+                .map(Object::toString)
+                .orElse(null);
 
         try {
             var orderId = UUID.randomUUID();
             if (!service.isExist(userId, orderId)) {
                 // flow error simulation
+                String error = null;
+                if ("order".equalsIgnoreCase(step)) {
+                    error = input.get("error").toString();
+                }
                 result = getError(result,
+                        error,
                         "Error in order step",
                         "Cannot create order");
                 if (result.getStatus() == TaskResult.Status.FAILED_WITH_TERMINAL_ERROR) {

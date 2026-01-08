@@ -7,7 +7,9 @@
       "taskReferenceName": "t_order",
       "type": "SIMPLE",
       "inputParameters": {
-        "userId": "${workflow.input.userId}"
+        "userId": "${workflow.input.userId}",
+        "error": "${workflow.input.error}",
+        "step": "${workflow.input.step}"
       }
     },
     {
@@ -17,7 +19,9 @@
       "inputParameters": {
         "userId": "${workflow.input.userId}",
         "amount": "${workflow.input.amount}",
-        "orderId": "${t_order.output.orderId}"
+        "orderId": "${t_order.output.orderId}",
+        "error": "${workflow.input.error}",
+        "step": "${workflow.input.step}"
       }
     },
     {
@@ -27,7 +31,9 @@
       "inputParameters": {
         "userId": "${workflow.input.userId}",
         "orderId": "${t_order.output.orderId}",
-        "items": "${workflow.input.items}"
+        "items": "${workflow.input.items}",
+        "error": "${workflow.input.error}",
+        "step": "${workflow.input.step}"
       }
     },
     {
@@ -37,7 +43,9 @@
       "inputParameters": {
         "userId": "${workflow.input.userId}",
         "orderId": "${t_order.output.orderId}",
-        "address": "${workflow.input.address}"
+        "address": "${workflow.input.address}",
+        "error": "${workflow.input.error}",
+        "step": "${workflow.input.step}"
       }
     },
     {

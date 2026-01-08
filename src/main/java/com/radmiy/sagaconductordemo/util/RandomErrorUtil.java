@@ -12,9 +12,11 @@ public class RandomErrorUtil {
     // if random >= 0.2 normal workflow
     // if random < 0.2 and random >= 0.15 then application error
     // if random < 0.15 then terminate workflow as it has an error in business logic
-    public static TaskResult getError(TaskResult result, String errorStep, String failedTerminalError) {
+    public static TaskResult getError(TaskResult result, String error, String errorStep, String failedTerminalError) {
+        boolean isSimError = error != null && !error.isEmpty();
+
         Double random = Math.random();
-        if (random < 0.2) {
+        if (random < 0.2 || isSimError) {
             log.info("Random error={}", random);
             log.error(errorStep);
             if (random < 0.15) {

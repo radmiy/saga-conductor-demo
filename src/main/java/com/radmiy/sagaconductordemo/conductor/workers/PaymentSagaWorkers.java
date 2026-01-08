@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -26,6 +27,7 @@ public class PaymentSagaWorkers {
 
     /**
      * Payment creation task
+     *
      * @param input data that contains userId, orderId and amount
      * @return output data that contains paymentId
      */
@@ -36,11 +38,20 @@ public class PaymentSagaWorkers {
         var amount = new BigDecimal(input.get("amount").toString());
         var userId = UUID.fromString(input.get("userId").toString());
         var orderId = UUID.fromString(input.get("orderId").toString());
+        String step = Optional.ofNullable(input.get("step"))
+                .filter(Objects::nonNull)
+                .map(Object::toString)
+                .orElse(null);
 
         try {
             if (!service.isExist(userId, orderId)) {
                 // flow error simulation
+                String error = null;
+                if ("payment".equalsIgnoreCase(step)) {
+                    error = input.get("error").toString();
+                }
                 result = getError(result,
+                        error,
                         "Error in payment step",
                         "Insufficient funds on balance");
                 if (result.getStatus() == TaskResult.Status.FAILED_WITH_TERMINAL_ERROR) {
@@ -78,6 +89,7 @@ public class PaymentSagaWorkers {
 
     /**
      * Compensation task
+     *
      * @param input data that contains paymentId
      */
     @WorkerTask("refund_payment")

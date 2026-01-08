@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -26,6 +27,7 @@ public class InventorySagaWorkers {
 
     /**
      * Inventory creation task
+     *
      * @param input data that contains userId, orderId and goods
      * @return outpot data that contains inventoryId
      */
@@ -36,11 +38,20 @@ public class InventorySagaWorkers {
         var userId = UUID.fromString(input.get("userId").toString());
         var orderId = UUID.fromString(input.get("orderId").toString());
         var items = (List<String>) input.get("items");
+        String step = Optional.ofNullable(input.get("step"))
+                .filter(Objects::nonNull)
+                .map(Object::toString)
+                .orElse(null);
 
         try {
             if (!service.isExist(userId, orderId)) {
                 // flow error simulation
+                String error = null;
+                if ("inventory".equalsIgnoreCase(step)) {
+                    error = input.get("error").toString();
+                }
                 result = getError(result,
+                        error,
                         "Error in inventory step",
                         "Not enough goods in stock");
                 if (result.getStatus() == TaskResult.Status.FAILED_WITH_TERMINAL_ERROR) {
@@ -79,6 +90,7 @@ public class InventorySagaWorkers {
 
     /**
      * Compensation task
+     *
      * @param input data that contains inventoryId
      */
     @WorkerTask("release_inventory")
