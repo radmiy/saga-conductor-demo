@@ -24,6 +24,11 @@ public class InventorySagaWorkers {
 
     private final InventorySagaService service;
 
+    /**
+     * Inventory creation task
+     * @param input data that contains userId, orderId and goods
+     * @return outpot data that contains inventoryId
+     */
     @WorkerTask("reserve_inventory")
     public TaskResult reserveInventory(Map<String, Object> input) {
         log.info("Requested reserving inventory");
@@ -32,39 +37,50 @@ public class InventorySagaWorkers {
         var orderId = UUID.fromString(input.get("orderId").toString());
         var items = (List<String>) input.get("items");
 
-        result = getError(result,
-                "Error in inventory step",
-                "Not enough goods in stock");
-        if (result.getStatus() == TaskResult.Status.FAILED_WITH_TERMINAL_ERROR) {
-            return result;
-        }
-
-        var inventory = Inventory.builder()
-                .id(UUID.randomUUID())
-                .userId(userId)
-                .orderId(orderId)
-                .note("Create Payment for order %s".formatted(orderId))
-                .status(StepStatus.PENDING)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .items(items)
-                .build();
         try {
-            inventory = service.create(inventory);
-            log.info("Reserved inventory");
+            if (!service.isExist(userId, orderId)) {
+                // flow error simulation
+                result = getError(result,
+                        "Error in inventory step",
+                        "Not enough goods in stock");
+                if (result.getStatus() == TaskResult.Status.FAILED_WITH_TERMINAL_ERROR) {
+                    return result;
+                }
+
+                var inventory = Inventory.builder()
+                        .id(UUID.randomUUID())
+                        .userId(userId)
+                        .orderId(orderId)
+                        .note("Create Payment for order %s".formatted(orderId))
+                        .status(StepStatus.PENDING)
+                        .createdAt(LocalDateTime.now())
+                        .updatedAt(LocalDateTime.now())
+                        .items(items)
+                        .build();
+                inventory = service.create(inventory);
+                log.info("Reserved inventory");
+
+                Map<String, Object> output = Map.of(
+                        "inventoryId", inventory.getId()
+                );
+                result.setOutputData(output);
+            }
+
+            result.setStatus(TaskResult.Status.COMPLETED);
+            return result;
         } catch (Exception err) {
             log.error("Error while saving inventory", err);
+            result.setStatus(TaskResult.Status.FAILED);
             throw new RuntimeException(err);
         }
 
-        Map<String, Object> output = Map.of(
-                "inventoryId", inventory.getId()
-        );
-        result.setOutputData(output);
-        result.setStatus(TaskResult.Status.COMPLETED);
-        return result;
+
     }
 
+    /**
+     * Compensation task
+     * @param input data that contains inventoryId
+     */
     @WorkerTask("release_inventory")
     public void compensateStep1(Map<String, Object> input) {
         log.info("Requested release inventory");

@@ -8,6 +8,10 @@ import lombok.extern.slf4j.Slf4j;
 @UtilityClass
 public class RandomErrorUtil {
 
+    // Initialization task error
+    // if random >= 0.2 normal workflow
+    // if random < 0.2 and random >= 0.15 then application error
+    // if random < 0.15 then terminate workflow as it has an error in business logic
     public static TaskResult getError(TaskResult result, String errorStep, String failedTerminalError) {
         Double random = Math.random();
         if (random < 0.2) {

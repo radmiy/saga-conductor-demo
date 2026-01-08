@@ -29,6 +29,11 @@ public class OrderController {
     private final StartWorkflowService service;
     private final UserInfoService userInfoService;
 
+    /**
+     * Method for launching the main workflow
+     * @param orderRequest input data that contains all the parameters necessary for launching
+     * @return
+     */
     @PostMapping("/start-saga")
     public ResponseEntity<String> startSaga(@RequestBody OrderRequest orderRequest) {
         log.info("Request to run Saga for a user: {}. Amount: {}",
@@ -42,6 +47,12 @@ public class OrderController {
         }
     }
 
+    /**
+     * Method of searching for orders with filtering, paging and sorting
+     * @param filter input data by which filtering is performed
+     * @param pageable input data by which paging and sorting is performed
+     * @return
+     */
     @GetMapping("/search")
     public ResponseEntity<Page<UserInfo>> getPaymentsByStatus(
             @ModelAttribute UserFilter filter,

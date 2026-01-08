@@ -28,6 +28,9 @@ public class ConductorInitializer {
     @Value("${conductor.client.rootUri:http://localhost:8080/api/}")
     private String rootUri;
 
+    /**
+     * Initialization saga workflow
+     */
     @EventListener(ApplicationReadyEvent.class)
     public void init() {
         log.info("Start of metadata initialization Conductor...");
@@ -35,6 +38,7 @@ public class ConductorInitializer {
         MetadataClient metadataClient = new MetadataClient(conductorClient);
 
         try {
+            // Read and register workflow tasks
             List<TaskDef> taskDefs = objectMapper.readValue(
                     new ClassPathResource("conductor/tasks.json").getInputStream(),
                     new TypeReference<List<TaskDef>>() {
@@ -43,6 +47,7 @@ public class ConductorInitializer {
             metadataClient.registerTaskDefs(taskDefs);
             log.info("Task definitions registered {}", taskDefs.size());
 
+            // Read and register compensation workflow
             WorkflowDef compensationWf = objectMapper.readValue(
                     new ClassPathResource("conductor/compensation_wf.json").getInputStream(),
                     WorkflowDef.class
@@ -50,6 +55,7 @@ public class ConductorInitializer {
             metadataClient.registerWorkflowDef(compensationWf);
             log.info("Rollback Workflow Registered: {}", compensationWf.getName());
 
+            // Read and register main workflow
             WorkflowDef mainWf = objectMapper.readValue(
                     new ClassPathResource("conductor/saga_wf.json").getInputStream(),
                     WorkflowDef.class

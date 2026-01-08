@@ -1,16 +1,11 @@
 package com.radmiy.sagaconductordemo.service;
 
-import com.radmiy.sagaconductordemo.dto.UserInfo;
 import com.radmiy.sagaconductordemo.mapper.UserInfoMapper;
 import com.radmiy.sagaconductordemo.repository.OrderSagaRepository;
-import com.radmiy.sagaconductordemo.repository.filter.OrderSpecifications;
-import com.radmiy.sagaconductordemo.repository.filter.UserFilter;
 import com.radmiy.sagaconductordemo.repository.model.Order;
 import com.radmiy.sagaconductordemo.repository.model.StepStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -51,6 +46,11 @@ public class OrderSagaService implements SagaService<Order> {
 
     @Override
     public void confirm(UUID id) {
-        updateStatus(id, StepStatus.COMPLETE);
+        updateStatus(id, StepStatus.COMPLETED);
+    }
+
+    @Override
+    public boolean isExist(UUID userId, UUID id) {
+        return repository.existsByIdAndUserId(userId, id);
     }
 }

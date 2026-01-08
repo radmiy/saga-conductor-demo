@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -24,6 +23,11 @@ public class ShippingSagaWorkers {
 
     private final ShippingSagaService service;
 
+    /**
+     * Shipping order creation task
+     * @param input data that contains userId, orderId and address
+     * @return output data that contains shipmentId
+     */
     @WorkerTask("create_shipping")
     public TaskResult createShipping(Map<String, Object> input) {
         log.info("Requested creation shipment");
@@ -32,39 +36,48 @@ public class ShippingSagaWorkers {
         var userId = UUID.fromString(input.get("userId").toString());
         var orderId = UUID.fromString(input.get("orderId").toString());
 
-        result = getError(result,
-                "Error in shipping step",
-                "Shipping address not exist");
-        if (result.getStatus() == TaskResult.Status.FAILED_WITH_TERMINAL_ERROR) {
-            return result;
-        }
-
-        var shipment = Shipment.builder()
-                .id(UUID.randomUUID())
-                .userId(userId)
-                .orderId(orderId)
-                .note("Create Payment for order %s".formatted(orderId))
-                .status(StepStatus.PENDING)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .address(address)
-                .build();
         try {
-            shipment = service.create(shipment);
-            log.info("Shipment created");
+            if (!service.isExist(userId, orderId)) {
+                // flow error simulation
+                result = getError(result,
+                        "Error in shipping step",
+                        "Shipping address not exist");
+                if (result.getStatus() == TaskResult.Status.FAILED_WITH_TERMINAL_ERROR) {
+                    return result;
+                }
+
+                var shipment = Shipment.builder()
+                        .id(UUID.randomUUID())
+                        .userId(userId)
+                        .orderId(orderId)
+                        .note("Create Payment for order %s".formatted(orderId))
+                        .status(StepStatus.PENDING)
+                        .createdAt(LocalDateTime.now())
+                        .updatedAt(LocalDateTime.now())
+                        .address(address)
+                        .build();
+                shipment = service.create(shipment);
+                log.info("Shipment created");
+
+                Map<String, Object> output = Map.of(
+                        "shipmentId", shipment.getId()
+                );
+                result.setOutputData(output);
+            }
+
+            result.setStatus(TaskResult.Status.COMPLETED);
+            return result;
         } catch (Exception err) {
             log.error("Error while saving shipping", err);
+            result.setStatus(TaskResult.Status.FAILED);
             throw new RuntimeException(err);
         }
-
-        Map<String, Object> output = Map.of(
-                "shipmentId", shipment.getId()
-        );
-        result.setOutputData(output);
-        result.setStatus(TaskResult.Status.COMPLETED);
-        return result;
     }
 
+    /**
+     * Compensation task
+     * @param input data that contains shipmentId
+     */
     @WorkerTask("cancel_shipping")
     public void cancelShipping(Map<String, Object> input) {
         log.info("Requested cancel shipment");

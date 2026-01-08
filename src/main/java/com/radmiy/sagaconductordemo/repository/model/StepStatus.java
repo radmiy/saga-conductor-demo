@@ -6,5 +6,5 @@ public enum StepStatus {
     DECLINED,
     APPROVED,
     FAILED,
-    COMPLETE
+    COMPLETED
 }

@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -24,43 +23,63 @@ public class OrderSagaWorkers {
 
     private final OrderSagaService service;
 
+    /**
+     * Order Creation Task
+     *
+     * @param input data that contains the userId
+     * @return output data that contains orderId
+     */
     @WorkerTask("reserve_order")
     public TaskResult createOrder(Map<String, Object> input) {
         log.info("Requested creation order");
         var result = new TaskResult();
         var userId = UUID.fromString(input.get("userId").toString());
 
-        result = getError(result,
-                "Error in order step",
-                "Cannot create order");
-        if (result.getStatus() == TaskResult.Status.FAILED_WITH_TERMINAL_ERROR) {
+        try {
+            var orderId = UUID.randomUUID();
+            if (!service.isExist(userId, orderId)) {
+                // flow error simulation
+                result = getError(result,
+                        "Error in order step",
+                        "Cannot create order");
+                if (result.getStatus() == TaskResult.Status.FAILED_WITH_TERMINAL_ERROR) {
+                    return result;
+                }
+
+                var order = Order.builder()
+                        .id(orderId)
+                        .userId(userId)
+                        .note("Create Order for user %s".formatted(userId))
+                        .status(StepStatus.PENDING)
+                        .createdAt(LocalDateTime.now())
+                        .updatedAt(LocalDateTime.now())
+                        .build();
+
+                order = service.create(order);
+                log.info("Order created");
+
+                Map<String, Object> output = Map.of(
+                        "orderId", order.getId()
+                );
+                result.setOutputData(output);
+                result.setStatus(TaskResult.Status.COMPLETED);
+            } else {
+                log.error("Error: order with id:{} exist.", orderId);
+                result.setStatus(TaskResult.Status.FAILED);
+            }
+            return result;
+        } catch (Exception err) {
+            log.error("Error while creating order", err);
+            result.setStatus(TaskResult.Status.FAILED);
             return result;
         }
-
-        var order = Order.builder()
-                .id(UUID.randomUUID())
-                .userId(userId)
-                .note("Create Order for user %s".formatted(userId))
-                .status(StepStatus.PENDING)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .build();
-        try {
-            order = service.create(order);
-            log.info("Order created");
-        } catch (Exception err) {
-            log.error("Error while saving order", err);
-            throw err;
-        }
-
-        Map<String, Object> output = Map.of(
-                "orderId", order.getId()
-        );
-        result.setOutputData(output);
-        result.setStatus(TaskResult.Status.COMPLETED);
-        return result;
     }
 
+    /**
+     * Compensation task
+     *
+     * @param input data that contains orderId
+     */
     @WorkerTask("cancel_order")
     public void cancelOrder(Map<String, Object> input) {
         log.info("Requested cancel order");

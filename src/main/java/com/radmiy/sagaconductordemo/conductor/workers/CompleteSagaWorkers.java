@@ -24,6 +24,11 @@ public class CompleteSagaWorkers {
     private final SagaService<Inventory> inventorySagaService;
     private final SagaService<Shipment> shippingSagaService;
 
+    /**
+     * The last step to complete the order
+     * @param task input data that contains orderId, paymentId, inventoryId and shipmentId
+     * @return
+     */
     @WorkerTask("complete_saga_task")
     public TaskResult completeSaga(Task task) {
         log.info("Requested task complete");

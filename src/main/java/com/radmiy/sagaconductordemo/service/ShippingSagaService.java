@@ -44,6 +44,11 @@ public class ShippingSagaService implements SagaService<Shipment> {
 
     @Override
     public void confirm(UUID id) {
-        updateStatus(id, StepStatus.COMPLETE);
+        updateStatus(id, StepStatus.COMPLETED);
+    }
+
+    @Override
+    public boolean isExist(UUID userId, UUID orderId) {
+        return repository.existsByUserIdAndOrderId(userId, orderId);
     }
 }

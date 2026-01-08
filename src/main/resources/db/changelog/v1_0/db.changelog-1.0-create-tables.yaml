@@ -38,6 +38,16 @@ databaseChangeLog:
                   constraints:
                     nullable: false
                   defaultValueComputed: CURRENT_TIMESTAMP
+        - addUniqueConstraint:
+            tableName: orders
+            columnNames: id, user_id
+            constraintName: pk_orders_user
+        - createIndex:
+            tableName: orders
+            indexName: idx_orders_user_id
+            columns:
+              - column:
+                  name: user_id
 
         - createTable:
             tableName: payments
@@ -84,6 +94,20 @@ databaseChangeLog:
                   type: DECIMAL(11, 2)
                   constraints:
                     nullable: false
+        - createIndex:
+            tableName: payments
+            indexName: idx_payments_user_id_order_id
+            columns:
+              - column:
+                  name: user_id
+              - column:
+                  name: order_id
+        - createIndex:
+            tableName: payments
+            indexName: idx_payments_order_id
+            columns:
+              - column:
+                  name: order_id
 
         - createTable:
             tableName: inventories
@@ -128,6 +152,20 @@ databaseChangeLog:
               - column:
                   name: items
                   type: JSONB
+        - createIndex:
+            tableName: inventories
+            indexName: idx_inventories_user_id_order_id
+            columns:
+              - column:
+                  name: user_id
+              - column:
+                  name: order_id
+        - createIndex:
+            tableName: inventories
+            indexName: idx_inventories_order_id
+            columns:
+              - column:
+                  name: order_id
 
         - createTable:
             tableName: shipments
@@ -174,3 +212,17 @@ databaseChangeLog:
                   type: varchar(255)
                   constraints:
                     nullable: false
+        - createIndex:
+            tableName: shipments
+            indexName: idx_shipments_user_id_order_id
+            columns:
+              - column:
+                  name: user_id
+              - column:
+                  name: order_id
+        - createIndex:
+            tableName: shipments
+            indexName: idx_shipments_order_id
+            columns:
+              - column:
+                  name: order_id

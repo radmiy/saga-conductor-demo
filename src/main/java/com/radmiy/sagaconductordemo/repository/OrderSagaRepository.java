@@ -10,4 +10,5 @@ import java.util.UUID;
 @Repository
 public interface OrderSagaRepository extends JpaRepository<Order, UUID>, JpaSpecificationExecutor<Order> {
 
+    boolean existsByIdAndUserId(UUID userId, UUID id);
 }
