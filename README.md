@@ -214,7 +214,7 @@ curl --location 'http://localhost:8090/api/orders/search?status=COMPLETED&item=t
     "totalPages": 1
 }
 ```
-4. Запуск saga воруфлоу с эмитацией ошибки на степе inventory
+4. Запуск saga воруфлоу с эмитацией ошибки на степе inventory.
 Вызов ошибки воркфлоу реализован случайным образом, но для демонстрации функционала была реализовано вызов ошибки через параметры
 __"error": "error", "step": "inventory"__ 
 
